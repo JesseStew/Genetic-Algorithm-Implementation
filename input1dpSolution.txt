@@ -1,0 +1,25 @@
+game board: [0, 3, 80, 6, 57, 10]
+cost:  19
+path showing indices of visited cells: 0 -> 1 -> 3 -> 5
+path showing contents of visited cells: 0 -> 3 -> 6 -> 10
+___________________________
+game board: [0, 98, 7, 44, 25, 3, 5, 85, 46, 4]
+cost:  87
+path showing indices of visited cells: 0 -> 2 -> 4 -> 6 -> 8 -> 9
+path showing contents of visited cells: 0 -> 7 -> 25 -> 5 -> 46 -> 4
+___________________________
+game board: [0, 57, 59, 83, 9, 42, 70]
+cost:  138
+path showing indices of visited cells: 0 -> 2 -> 4 -> 6
+path showing contents of visited cells: 0 -> 59 -> 9 -> 70
+___________________________
+game board: [0, 20, 49, 96, 53, 7, 43, 77]
+cost:  186
+path showing indices of visited cells: 0 -> 2 -> 4 -> 5 -> 7
+path showing contents of visited cells: 0 -> 49 -> 53 -> 7 -> 77
+___________________________
+game board: [0, 24, 17, 15, 61, 49, 61, 8, 65, 43, 26, 99, 7, 57, 97, 50, 93, 6, 82, 52]
+cost:  330
+path showing indices of visited cells: 0 -> 2 -> 3 -> 5 -> 7 -> 9 -> 10 -> 12 -> 13 -> 15 -> 17 -> 19
+path showing contents of visited cells: 0 -> 17 -> 15 -> 49 -> 8 -> 43 -> 26 -> 7 -> 57 -> 50 -> 6 -> 52
+___________________________
