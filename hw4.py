@@ -46,6 +46,9 @@ for line in f:
 Step 0.  Algorithm Initialization.  Assume data are encoded in bit strings (1’s and 0’s).
 Specify a crossover probability/rate pc and a mutation probability/rate pm.  
 Usually pc is chosen to be fairly high and pm is chosen to be very low.
+
+Need to create multiple chromosome variations for each population. Base this on
+the length of the num of chromosomes.
 '''
 def initializePopulation(totalInput):
     #random.randint(0,1)
