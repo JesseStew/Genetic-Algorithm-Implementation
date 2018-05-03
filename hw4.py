@@ -6,38 +6,29 @@ Description:   Solves various Jump-It game boards with a genetic algorithm
 Trace Folder:  stewart013
 """
 
-"""
-@Jesse: I took the print statements from the solutions and output them to a
-text file. I figured it would get confusing if we added that code to this
-program due to needing the same variable names and we really only needed the 
-results. We will only need to call the getDPSolutions function once and it
-returns a list of lists with the results. I was thinking our main function
-would look something like this...
-
-def main():
-    dpSol = getDpSolutions(inputFile)
-    gaSol = .... (might need multiple functions)
-    for i in range(len(number of lines in inputFile):
-        printDpSolution(dpSol[i])
-        printGaSolution(gaSol[i])
-    printAccuracy
-
-"""
 #---------------------------------Imports--------------------------------------
-
+import sys
+import modified_DP_solution as dpFile
 #------------------------------------------------------------------------------
 
 #---------------------------------Variables------------------------------------
+global inputFile
 inputFile = 'input1.txt'
+#import modified_DP_solution as dpFile
 #------------------------------------------------------------------------------
 
 #---------------------------------Classes/Functions----------------------------
 """
-Description: ...
-Input:       ...
-Returns:     ...
+Description: Gathers output from dynamic programming solution into a list, 
+             formats the minimum cost line, and creates sublists representing
+             each gameboard's output.
+Input:       Text file containing output of dynamic programming solution's
+             print statements.
+Returns:     List containing sublists for each gameboard's dynamic programming
+             solutions.
 """
 def getDpSolutions(inputFile):
+    #dpFile.runFile()
     solutionFile = inputFile[:-4]+'dpSolution.txt'
     with open(solutionFile, 'r') as f:
         lines = [i.strip() for i in f.readlines()]
@@ -64,9 +55,16 @@ def printDpSolution(dpSolution):
 
 #---------------------------------Program Main---------------------------------
 def main():
+    writeFile = open(inputFile[:-4]+'dpSolution.txt', "w")
+    origSysOut = sys.stdout
+    sys.stdout = writeFile
+    dpFile.runFile(inputFile)
+    writeFile.close()
+    sys.stdout = origSysOut
     dpSol = getDpSolutions(inputFile)
-    print(dpSol)
+    #print(dpSol)
     printDpSolution(dpSol[0])
     printDpSolution(dpSol[1])
-main()		
+
+main()
 #---------------------------------End of Program-------------------------------
