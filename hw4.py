@@ -42,12 +42,15 @@ for line in f:
     lyst = list(map(int, lyst))
     totalInput.append(lyst)
 
+    
 '''
 Step 0.  Algorithm Initialization.  Assume data are encoded in bit strings (1’s and 0’s).
 Specify a crossover probability/rate pc and a mutation probability/rate pm.  
 Usually pc is chosen to be fairly high and pm is chosen to be very low.
+
 Description: The population size for each board is based on the number of
              chromosomes present in the board, len(totalInput[popIndex])*5.
+
 Input:       totalInput (list of lists): 
                  the input text file as a list of lists.
                  
@@ -75,12 +78,14 @@ def initializePopulation(totalInput):
         totalEncodedBoardPaths[popIndex] = encodedBoardPathsOfPop
     return totalEncodedBoardPaths
 
-
+ 
 '''
 Description: Appends the calculated cost of the traversed path (individual)
              to the end of the game path (individual).
+
 Input:       totalInput (list of lists): 
-                the input text file as a list of lists.
+                 the input text file as a list of lists.
+
                  
 Returns:     totalEncodedBoardPaths (dictionary of lists of lists):
                  Same as initializePopulation function with the difference of 
@@ -101,24 +106,50 @@ def calcCost(totalInput):
             individual.append(sum(costsOfGame)) #append individual to be popped off for use later
         totalInputIndex = totalInputIndex + 1
     return totalEncodedBoardPaths
-        
-
-    '''
-    for itr in range(0, len(totalInput)):
-        costs = []
-        for num in range(0, len(totalInput[itr])):
-            if totalEncodedBoardPaths[itr][num] == 1:
-                costs.append(totalInput[itr][num])
-        print(costs)
-        totalCosts.append(sum(costs))
-    '''
-    #is not returning correct costs
-    #return totalCosts
+  
 
 '''
 Step 2.  The fitness function f(x) for each chromosome in the population is calculated.
+
+Description: ...
+Input:       initialPopWithCosts (dictionary of lists of lists):
+                The returned function from calcCost.
+
+Returns:     totalEncodedBoardPaths (dictionary of lists):
+                A dictionary with the population index as the key, the 
+                scores (inverse of cost) of the indexed game paths (individual)
+                stored in a list.
+
 '''
-#def fitnessFunction():
+def fitnessFunction(initialPopWithCosts):
+    fitnessScoresOfPopulation = {}
+    for populationKey in initialPopWithCosts:
+        fitnessScore = []
+        for individual in initialPopWithCosts[populationKey]:
+            fitnessScore.append(1/individual[len(individual)-1]) #use the inverse of 
+        fitnessScoresOfPopulation[populationKey] = (fitnessScore)
+    return fitnessScoresOfPopulation
+
+
+"""
+Description: Divide each f(x) by sum(scores)
+
+Input:       fitnessScores (dictionary of lists):
+                The returned function from fitnessFunction.
+                
+Returns:     selectionProbabilitiesOfPopulations (dictionary of lists):
+                A dictionary with the population index as the key, the 
+                selection probability (fitness score/sum of fitness scores) of 
+                the indexed game paths (individual) stored in a list.
+"""
+def selectionProbability(fitnessScores):
+    selectionProbabilitiesOfPopulations = {}
+    for populationKey in fitnessScores:
+        selectionProbabilities = []
+        for individual in fitnessScores[populationKey]:
+            selectionProbabilities.append(individual/sum(fitnessScores[populationKey]))
+        selectionProbabilitiesOfPopulations[populationKey] = selectionProbabilities
+    return selectionProbabilitiesOfPopulations
 
 
 """
@@ -137,7 +168,6 @@ def getDpSolutions(inputFile):
         lines[1::5] = ['minimum ' + num for num in lines[1::5]]
     solutions = [lines[x*5:x*5+5:] for x in range(int(len(lines)/5))]
     return solutions
-
 
 """
 Description: Takes a list containing the dynamic programming solution for a
@@ -169,7 +199,12 @@ def main():
     writeFile.close()
     sys.stdout = origSysOut
     
+    dpSol = getDpSolutions(inputFile)
     initialPopWithCosts = calcCost(totalInput)
+    fitnessScores = fitnessFunction(initialPopWithCosts)
+    selectionProbabilities = selectionProbability(fitnessScores)
+    #costs = calcCost(totalInput)
+
     '''
     print(totalInput)
     print(encodedPop)
@@ -179,17 +214,17 @@ def main():
         print("totalInput[", num, "]              = ", totalInput[num])
         for itr in range(0, 5):
             print("initialPopWithCosts[", num, "][", itr,"] = ", initialPopWithCosts[num][itr])
-        print("initialPopWithCosts[", num, "][", len(initialPopWithCosts[num])-1,"]= ", initialPopWithCosts[num][len(initialPopWithCosts[num])-1])
+            print("fitnessScores[", num, "][", itr,"] = ", fitnessScores[num][itr])
+            print("selectionProbabilities[", num, "][", itr,"] = ", selectionProbabilities[num][itr], "\n")
+        print("initialPopWithCosts[", num, "][", len(initialPopWithCosts[num])-1,"]= ", 
+              initialPopWithCosts[num][len(initialPopWithCosts[num])-1])
         print("len(initialPop[num]) = ", len(initialPopWithCosts[num]), "\n\n")
         #print("initialPopWithCosts[", num, "] = ", initialPopWithCosts[num])
         #print("costs[", num, "] = ", costs[num])
-     
+    
     '''
-    dpSol = getDpSolutions(inputFile)
-    print(dpSol)
     printDpSolution(dpSol[0])
     printDpSolution(dpSol[1])
     '''
-
-main()
+main()		
 #---------------------------------End of Program-------------------------------
