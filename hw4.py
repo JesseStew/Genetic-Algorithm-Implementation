@@ -6,6 +6,16 @@ Description:   Solves various Jump-It game boards with a genetic algorithm
 Trace Folder:  stewart013
 """
 
+"""
+def main():
+-    dpSol = getDpSolutions(inputFile)
+-    gaSol = .... (might need multiple functions)
+-    for i in range(len(number of lines in inputFile):
+-        printDpSolution(dpSol[i])
+-        printGaSolution(gaSol[i])
+-    printAccuracy
+-
+-"""
 #---------------------------------Imports--------------------------------------
 import sys
 import modified_DP_solution as dpFile
@@ -121,7 +131,6 @@ Returns:     List containing sublists for each gameboard's dynamic programming
              solutions.
 """
 def getDpSolutions(inputFile):
-    #dpFile.runFile()
     solutionFile = inputFile[:-4]+'dpSolution.txt'
     with open(solutionFile, 'r') as f:
         lines = [i.strip() for i in f.readlines()]
