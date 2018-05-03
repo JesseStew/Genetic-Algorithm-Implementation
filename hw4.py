@@ -29,8 +29,12 @@ import random
 
 #---------------------------------Variables------------------------------------
 inputFile = 'input1.txt'
+
+#Specify a crossover probability/rate pc and a mutation probability/rate pm.
 crossoverRate = 0.75
 mutationRate = 0.01
+
+#Used to clear console output
 clear = 100*'\n'
 #------------------------------------------------------------------------------
 
@@ -59,17 +63,13 @@ Returns:     totalEncodedBoardPaths (dictionary of lists of lists):
                  individuls that make up the population, whose chromosomes are stored
                  in another list as 1's and 0's, corresponding to chromosomes where
                  1 represents a visited tuple and zero represents a skipped tuple.
-
-Need to create multiple chromosome variations for each population. Base this on
-the length of the num of chromosomes.
-
 '''
 def initializePopulation(totalInput):
     #random.randint(0,1)
     totalEncodedBoardPaths = {}
     for popIndex in range(0, len(totalInput)):
         encodedBoardPathsOfPop = []
-        for nu in range(0, len(totalInput[popIndex])*5):
+        for nu in range(0, len(totalInput[popIndex])*5): #create population size of number of chromosomes*5
             encodedBoardPath = []
             for num in range(0, len(totalInput[popIndex])):
                 if ((num > 0) and (encodedBoardPath[num-1] == 0)) or (num+1 == len(totalInput[popIndex])) or (num == 0):
@@ -82,13 +82,35 @@ def initializePopulation(totalInput):
     return totalEncodedBoardPaths
 
 '''
-Returns: a list with the cost of the initialized populations game in the 
-         game's associated index.
+Description: Appends the calculated cost of the traversed path (individual)
+             to the end of the game path (individual).
+
+Input:       totalInput (list of lists): 
+                 the input text file as a list of lists.
+                 
+Returns:     totalEncodedBoardPaths (dictionary of lists of lists):
+                 Same as initializePopulation function with the difference of 
+                 the calculated cost of the traversed path (individual) 
+                 appended to the end of the game path (individual).
 '''
-'''
+
 def calcCost(totalInput):
     totalEncodedBoardPaths = initializePopulation(totalInput)
-    totalCosts = []
+    totalInputIndex = 0
+    
+    for populationKey in totalEncodedBoardPaths:
+        for individual in totalEncodedBoardPaths[populationKey]:
+            costsOfGame = []
+            for chromosomeIndex in range(0, len(individual)):
+                if individual[chromosomeIndex] == 1:
+                    costsOfGame.append(totalInput[totalInputIndex][chromosomeIndex])
+            # maybe change storage method?
+            individual.append(sum(costsOfGame)) #append individual to be popped off for use later
+        totalInputIndex = totalInputIndex + 1
+    return totalEncodedBoardPaths
+        
+
+    '''
     for itr in range(0, len(totalInput)):
         costs = []
         for num in range(0, len(totalInput[itr])):
@@ -96,9 +118,10 @@ def calcCost(totalInput):
                 costs.append(totalInput[itr][num])
         print(costs)
         totalCosts.append(sum(costs))
+    '''
     #is not returning correct costs
-    return totalCosts
-'''
+    #return totalCosts
+
 '''
 Step 2.  The fitness function f(x) for each chromosome in the population is calculated.
 '''
@@ -136,7 +159,7 @@ def printDpSolution(dpSolution):
 #---------------------------------Program Main---------------------------------
 def main():
     #dpSol = getDpSolutions(inputFile)
-    encodedPop = initializePopulation(totalInput)
+    initialPopWithCosts = calcCost(totalInput)
     #costs = calcCost(totalInput)
     '''
     print(totalInput)
@@ -144,9 +167,12 @@ def main():
     print("costs: ", costs)
     '''
     for num in range(0, len(totalInput)):
-        print("totalInput[", num, "] = ", totalInput[num])
-        print("encodedPop[", num, "] = ", encodedPop[num])
-        print("len(encodedPop[num]) = ", len(encodedPop[num]), "\n\n")
+        print("totalInput[", num, "]              = ", totalInput[num])
+        for itr in range(0, 5):
+            print("initialPopWithCosts[", num, "][", itr,"] = ", initialPopWithCosts[num][itr])
+        print("initialPopWithCosts[", num, "][", len(initialPopWithCosts[num])-1,"]= ", initialPopWithCosts[num][len(initialPopWithCosts[num])-1])
+        print("len(initialPop[num]) = ", len(initialPopWithCosts[num]), "\n\n")
+        #print("initialPopWithCosts[", num, "] = ", initialPopWithCosts[num])
         #print("costs[", num, "] = ", costs[num])
     
     '''
