@@ -93,7 +93,6 @@ Returns:     totalEncodedBoardPaths (dictionary of lists of lists):
                  the calculated cost of the traversed path (individual) 
                  appended to the end of the game path (individual).
 '''
-
 def calcCost(totalInput):
     totalEncodedBoardPaths = initializePopulation(totalInput)
     totalInputIndex = 0
@@ -108,24 +107,48 @@ def calcCost(totalInput):
             individual.append(sum(costsOfGame)) #append individual to be popped off for use later
         totalInputIndex = totalInputIndex + 1
     return totalEncodedBoardPaths
-        
-
-    '''
-    for itr in range(0, len(totalInput)):
-        costs = []
-        for num in range(0, len(totalInput[itr])):
-            if totalEncodedBoardPaths[itr][num] == 1:
-                costs.append(totalInput[itr][num])
-        print(costs)
-        totalCosts.append(sum(costs))
-    '''
-    #is not returning correct costs
-    #return totalCosts
 
 '''
 Step 2.  The fitness function f(x) for each chromosome in the population is calculated.
+
+Description: ...
+Input:       initialPopWithCosts (dictionary of lists of lists):
+                The returned function from calcCost.
+
+Returns:     totalEncodedBoardPaths (dictionary of lists):
+                A dictionary with the population index as the key, the 
+                scores (inverse of cost) of the indexed game paths (individual)
+                stored in a list.
+
 '''
-#def fitnessFunction():
+def fitnessFunction(initialPopWithCosts):
+    fitnessScoresOfPopulation = {}
+    for populationKey in initialPopWithCosts:
+        fitnessScore = []
+        for individual in initialPopWithCosts[populationKey]:
+            fitnessScore.append(1/individual[len(individual)-1]) #use the inverse of 
+        fitnessScoresOfPopulation[populationKey] = (fitnessScore)
+    return fitnessScoresOfPopulation
+
+"""
+Description: Divide each f(x) by sum(scores)
+
+Input:       fitnessScores (dictionary of lists):
+                The returned function from fitnessFunction.
+                
+Returns:     selectionProbabilitiesOfPopulations (dictionary of lists):
+                A dictionary with the population index as the key, the 
+                selection probability (fitness score/sum of fitness scores) of 
+                the indexed game paths (individual) stored in a list.
+"""
+def selectionProbability(fitnessScores):
+    selectionProbabilitiesOfPopulations = {}
+    for populationKey in fitnessScores:
+        selectionProbabilities = []
+        for individual in fitnessScores[populationKey]:
+            selectionProbabilities.append(individual/sum(fitnessScores[populationKey]))
+        selectionProbabilitiesOfPopulations[populationKey] = selectionProbabilities
+    return selectionProbabilitiesOfPopulations
 
 """
 Description: ...
@@ -160,6 +183,8 @@ def printDpSolution(dpSolution):
 def main():
     #dpSol = getDpSolutions(inputFile)
     initialPopWithCosts = calcCost(totalInput)
+    fitnessScores = fitnessFunction(initialPopWithCosts)
+    selectionProbabilities = selectionProbability(fitnessScores)
     #costs = calcCost(totalInput)
     '''
     print(totalInput)
@@ -170,7 +195,10 @@ def main():
         print("totalInput[", num, "]              = ", totalInput[num])
         for itr in range(0, 5):
             print("initialPopWithCosts[", num, "][", itr,"] = ", initialPopWithCosts[num][itr])
-        print("initialPopWithCosts[", num, "][", len(initialPopWithCosts[num])-1,"]= ", initialPopWithCosts[num][len(initialPopWithCosts[num])-1])
+            print("fitnessScores[", num, "][", itr,"] = ", fitnessScores[num][itr])
+            print("selectionProbabilities[", num, "][", itr,"] = ", selectionProbabilities[num][itr], "\n")
+        print("initialPopWithCosts[", num, "][", len(initialPopWithCosts[num])-1,"]= ", 
+              initialPopWithCosts[num][len(initialPopWithCosts[num])-1])
         print("len(initialPop[num]) = ", len(initialPopWithCosts[num]), "\n\n")
         #print("initialPopWithCosts[", num, "] = ", initialPopWithCosts[num])
         #print("costs[", num, "] = ", costs[num])
