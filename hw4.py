@@ -7,27 +7,23 @@ Trace Folder:  stewart013
 """
 
 """
-@Jesse: I took the print statements from the solutions and output them to a
-text file. I figured it would get confusing if we added that code to this
-program due to needing the same variable names and we really only needed the 
-results. We will only need to call the getDPSolutions function once and it
-returns a list of lists with the results. I was thinking our main function
-would look something like this...
-
 def main():
-    dpSol = getDpSolutions(inputFile)
-    gaSol = .... (might need multiple functions)
-    for i in range(len(number of lines in inputFile):
-        printDpSolution(dpSol[i])
-        printGaSolution(gaSol[i])
-    printAccuracy
-
-"""
+-    dpSol = getDpSolutions(inputFile)
+-    gaSol = .... (might need multiple functions)
+-    for i in range(len(number of lines in inputFile):
+-        printDpSolution(dpSol[i])
+-        printGaSolution(gaSol[i])
+-    printAccuracy
+-
+-"""
 #---------------------------------Imports--------------------------------------
+import sys
+import modified_DP_solution as dpFile
 import random
 #------------------------------------------------------------------------------
 
 #---------------------------------Variables------------------------------------
+global inputFile
 inputFile = 'input1.txt'
 
 #Specify a crossover probability/rate pc and a mutation probability/rate pm.
@@ -45,6 +41,7 @@ for line in f:
     lyst = line.split() # tokenize input line, it also removes EOL marker
     lyst = list(map(int, lyst))
     totalInput.append(lyst)
+
     
 '''
 Step 0.  Algorithm Initialization.  Assume data are encoded in bit strings (1’s and 0’s).
@@ -81,12 +78,14 @@ def initializePopulation(totalInput):
         totalEncodedBoardPaths[popIndex] = encodedBoardPathsOfPop
     return totalEncodedBoardPaths
 
+ 
 '''
 Description: Appends the calculated cost of the traversed path (individual)
              to the end of the game path (individual).
 
 Input:       totalInput (list of lists): 
                  the input text file as a list of lists.
+
                  
 Returns:     totalEncodedBoardPaths (dictionary of lists of lists):
                  Same as initializePopulation function with the difference of 
@@ -107,6 +106,7 @@ def calcCost(totalInput):
             individual.append(sum(costsOfGame)) #append individual to be popped off for use later
         totalInputIndex = totalInputIndex + 1
     return totalEncodedBoardPaths
+  
 
 '''
 Step 2.  The fitness function f(x) for each chromosome in the population is calculated.
@@ -130,6 +130,7 @@ def fitnessFunction(initialPopWithCosts):
         fitnessScoresOfPopulation[populationKey] = (fitnessScore)
     return fitnessScoresOfPopulation
 
+
 """
 Description: Divide each f(x) by sum(scores)
 
@@ -150,10 +151,15 @@ def selectionProbability(fitnessScores):
         selectionProbabilitiesOfPopulations[populationKey] = selectionProbabilities
     return selectionProbabilitiesOfPopulations
 
+
 """
-Description: ...
-Input:       ...
-Returns:     ...
+Description: Gathers output from dynamic programming solution into a list, 
+             formats the minimum cost line, and creates sublists representing
+             each gameboard's output.
+Input:       Text file containing output of dynamic programming solution's
+             print statements.
+Returns:     List containing sublists for each gameboard's dynamic programming
+             solutions.
 """
 def getDpSolutions(inputFile):
     solutionFile = inputFile[:-4]+'dpSolution.txt'
@@ -181,11 +187,24 @@ def printDpSolution(dpSolution):
 
 #---------------------------------Program Main---------------------------------
 def main():
-    #dpSol = getDpSolutions(inputFile)
+    """
+    Creates a new text document, passes input file to a slightly modified
+    version of the provided DP solution file to get the DP results, and then 
+    writes the results to the new text document.
+    """
+    writeFile = open(inputFile[:-4]+'dpSolution.txt', "w")
+    origSysOut = sys.stdout
+    sys.stdout = writeFile
+    dpFile.runFile(inputFile)
+    writeFile.close()
+    sys.stdout = origSysOut
+    
+    dpSol = getDpSolutions(inputFile)
     initialPopWithCosts = calcCost(totalInput)
     fitnessScores = fitnessFunction(initialPopWithCosts)
     selectionProbabilities = selectionProbability(fitnessScores)
     #costs = calcCost(totalInput)
+
     '''
     print(totalInput)
     print(encodedPop)
