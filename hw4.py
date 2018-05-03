@@ -47,26 +47,44 @@ Step 0.  Algorithm Initialization.  Assume data are encoded in bit strings (1’
 Specify a crossover probability/rate pc and a mutation probability/rate pm.  
 Usually pc is chosen to be fairly high and pm is chosen to be very low.
 
+Description: The population size for each board is based on the number of
+             chromosomes present in the board, len(totalInput[popIndex])*5.
+
+Input:       totalInput (list of lists): 
+                 the input text file as a list of lists.
+                 
+Returns:     totalEncodedBoardPaths (dictionary of lists of lists): 
+                 A dictionary with keys corresponding to the index
+                 of the board associated with the population. Dictionary contains a list of
+                 individuls that make up the population, whose chromosomes are stored
+                 in another list as 1's and 0's, corresponding to chromosomes where
+                 1 represents a visited tuple and zero represents a skipped tuple.
+
 Need to create multiple chromosome variations for each population. Base this on
 the length of the num of chromosomes.
+
 '''
 def initializePopulation(totalInput):
     #random.randint(0,1)
-    totalEncodedBoardPaths = []
-    for board in totalInput:
-        encodedBoardPath = []
-        for num in range(0, len(board)):
-            if ((num > 0) and (encodedBoardPath[num-1] == 0)) or (num+1 == len(board)) or (num == 0):
-                #print("num + 1 = ", num+1, "  len(board) = ", len(board))
-                encodedBoardPath.append(1)
-            else:
-                encodedBoardPath.append(random.randint(0,1))
-        totalEncodedBoardPaths.append(encodedBoardPath)
+    totalEncodedBoardPaths = {}
+    for popIndex in range(0, len(totalInput)):
+        encodedBoardPathsOfPop = []
+        for nu in range(0, len(totalInput[popIndex])*5):
+            encodedBoardPath = []
+            for num in range(0, len(totalInput[popIndex])):
+                if ((num > 0) and (encodedBoardPath[num-1] == 0)) or (num+1 == len(totalInput[popIndex])) or (num == 0):
+                    #print("num + 1 = ", num+1, "  len(board) = ", len(board))
+                    encodedBoardPath.append(1)
+                else:
+                    encodedBoardPath.append(random.randint(0,1))
+            encodedBoardPathsOfPop.append(encodedBoardPath)
+        totalEncodedBoardPaths[popIndex] = encodedBoardPathsOfPop
     return totalEncodedBoardPaths
 
 '''
 Returns: a list with the cost of the initialized populations game in the 
          game's associated index.
+'''
 '''
 def calcCost(totalInput):
     totalEncodedBoardPaths = initializePopulation(totalInput)
@@ -80,7 +98,7 @@ def calcCost(totalInput):
         totalCosts.append(sum(costs))
     #is not returning correct costs
     return totalCosts
-
+'''
 '''
 Step 2.  The fitness function f(x) for each chromosome in the population is calculated.
 '''
@@ -117,17 +135,23 @@ def printDpSolution(dpSolution):
 
 #---------------------------------Program Main---------------------------------
 def main():
-    dpSol = getDpSolutions(inputFile)
+    #dpSol = getDpSolutions(inputFile)
     encodedPop = initializePopulation(totalInput)
-    costs = calcCost(totalInput)
-    '''print(totalInput)
+    #costs = calcCost(totalInput)
+    '''
+    print(totalInput)
     print(encodedPop)
-    print("costs: ", costs)'''
+    print("costs: ", costs)
+    '''
     for num in range(0, len(totalInput)):
         print("totalInput[", num, "] = ", totalInput[num])
         print("encodedPop[", num, "] = ", encodedPop[num])
-        print("costs[", num, "] = ", costs[num])
+        print("len(encodedPop[num]) = ", len(encodedPop[num]), "\n\n")
+        #print("costs[", num, "] = ", costs[num])
+    
+    '''
     printDpSolution(dpSol[0])
     printDpSolution(dpSol[1])
+    '''
 main()		
 #---------------------------------End of Program-------------------------------
