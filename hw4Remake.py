@@ -34,7 +34,34 @@ def getGameBoards(inputFile):
     f.close()
     return gameBoards
 
-
+def printGaSolution(chromosome, gameBoard):
+    print("GA Solution")
+    pathIndices = []
+    pathValues = []
+    cost = 0
+    for num in range(0, len(chromosome)):
+        if chromosome[num] == 1:
+            cost = cost + gameBoard[num]
+            if num == len(chromosome) - 1:
+                indVal = str(num)
+                pathIndices.append(indVal)
+                pathVal = str(gameBoard[num])
+                pathValues.append(pathVal)
+            else:
+                indVal = str(num) + ' -> '
+                pathIndices.append(indVal)
+                pathVal = str(gameBoard[num]) + ' -> '
+                pathValues.append(pathVal)
+    print("minimum cost: ", cost)
+    print("path showing indices of visited cells: ", end = "")
+    for i in range(0, len(pathIndices)):
+        print(pathIndices[i], end = "")
+    print("\n" + "path showing contents of visited cells: ", end = "")
+    for i in range(0, len(pathValues)):
+        print(pathValues[i], end = "")
+    print("\n" + "=========================")
+    
+    
 """
 Description: Gathers output from dynamic programming solution into a list, 
              formats the minimum cost line, and creates sublists representing
@@ -77,7 +104,7 @@ Returns:     population, list containing sublists representing each chromosome.
 """
 def initializePopulation(gameBoard):
     population = []
-    for i in range(0, len(gameBoard)*2):
+    for i in range(0, len(gameBoard)):
         chromosome = []
         for num in range(0, len(gameBoard)):
             if ((num > 0) and (chromosome[num-1] == 0)) or \
@@ -147,21 +174,6 @@ def selectParents(population, selectionProb):
     
     # Step 3b
 """
-Description: ...
-Input:       ...
-Returns:     ...
-"""
-'''@@@@@@@@@@@@@@@
-Bool function to check if the selected locust will work or produce the bug
-'''
-def locustCheck(locustCandidateList, parents, locust):
-    if (parents[0][locust - 1] == 0 and parents[1][locust + 1] == 0):
-        return False
-    else:
-        return True
-    
-    
-"""
 Description: Utilizes pc to determine if crossover occurs. If it doesn't,
              children represent clones of parents.
 Input:       locustCandidateList, default value is none. May need to call
@@ -169,30 +181,40 @@ Input:       locustCandidateList, default value is none. May need to call
              parents, list containing parent chromosomes
 Returns:     list containing children chromosomes
 """
-'''@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-I tried to utilize another bool function for this to handle the bug with double
-0's. I also literally just noticed the bug that it might not crossover when
-looping back because it calculates the chance at the start of the function.
-Could just put that line of code in main before crossover is called.
-'''
-def crossover(locustCandidateList = None, parents):
+def crossover(locustCandidateList, parents, pc):
     pCross = pc*100
     crossVal = random.randint(0, 100)
-    if crossVal <= pc:
-        if locustCandidateList = None:
-            locustCandidateList = [x for x in range(1, len(parents[0] - 1))]
-            locust = random.choice(potentialLocusts)
+    if crossVal <= pCross and locustCandidateList != []:
+        if locustCandidateList == [None]:
+            locustCandidateList = [x for x in range(1, len(parents[0]))]
+        print('candidates', locustCandidateList)
+        locust = random.choice(locustCandidateList)
+        if locustCheck(locustCandidateList, parents, locust) == True:
             children = []
-            if locustCheck == True:
-                for i in range(0, locust):
-                    leftSide = 
-            else:
-                crossover(locustCandidateList, parents)
+            leftChild = parents[0][:locust] + parents[1][locust:]
+            children.append(leftChild)
+            rightChild = parents[1][:locust] + parents[0][locust:]
+            children.append(rightChild)
+            return children
+        else:
+            locustCandidateList.remove(locust)
+            crossover(locustCandidateList, parents, pc)
     else:
         return parents
         
     
+"""
+Description: ...
+Input:       ...
+Returns:     ...
+"""
+def locustCheck(locustCandidateList, parents, locust):
+    if (parents[0][locust - 1] == 0 and parents[1][locust] == 0):
+        return False
+    else:
+        return True
     
+        
     # Step 3c
 """ 
 Description: Utilizes mc to determine if children will be mutated or not. If
@@ -200,51 +222,55 @@ Description: Utilizes mc to determine if children will be mutated or not. If
 Input:       children, list containing 2 child chromosomes
 Returns:     children, updated list with new values mutation occurs.
 """
-''' @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-Needs some error handling for mutations causing two 0s in a row
-'''
-def mutate(children):
-    mCross = mc*100
+def mutate(children, mc):
+    mCross = int(mc*100)
     mutVal = random.randint(0, 100)
     if mutVal == mCross:
-        mutIndex = random.randint(1, len(children[0]) - 1)
-        if children[mutIndex] == 0:
-            children[mutIndex] = 1
-        else if children[mutIndex] == 1:
-            children[mutIndex] = 0
-    return children
+        mutIndex = random.randint(1, len(children[0]))
+        for i in range(0, 2): 
+            if children[i][mutIndex] == 0:
+                children[i][mutIndex] = 1
+            else:
+                children[i][mutIndex] = 0
+            return children
     else:
         return children
 
 # Algorith step 4 functions:
 """
-Description: ...
-Input:       ...
-Returns:     ...
+Description: Creates a new population to replace the old population after step
+             3 operations are applied.
+Input:       oldPop, original population list. popFitness, original population
+             list of fitness values. pc, probability of crossover. mc,
+             probability of mutation.
+Returns:     newPop, list containing new population consisting of children.
 """
-'''@@@@@@@@@@@@@@@@@@@@@@@@
-I think this function will loop the functions in step 3 until its repopulated
-with new children
-'''
-#def newPopulation():
+def newPopulation(oldPop, popFitness, pc, mc):
+    newPop = []
+    while len(newPop) != len(oldPop):
+        popSelectProb = selectionProbability(popFitness)
+        parents = selectParents(oldPop, popSelectProb)
+        candList = [None]
+        children = crossover(candList, parents, pc)
+        print(children)
+        children = mutate(children, mc)
+        print('mut Children', children)
+        for item in children:
+            newPop.append(item)
+    return newPop
 
 
 # Algorithm step 5 functions:
-"""
-Description: ...
-Input:       ...
-Returns:     ...
-"""
-'''@@@@@@@@@@@@@@@@@@@@@@@@
-Might not need a termination function. in Main we could add a generations
-variable that stops when it hits 1. Also, can compare the fitness values after
-step 2 in main to a variable thats made from dpSol minimum cost to see if any
-of the fitness values match the minimum cost's fitness. 
-'''
-#def termination():
-#------------------------------------------------------------------------------
-
-#---------------------------------Program Main---------------------------------
+def getBestFitVal(dpGameboardSol):
+    minCost = int(dpGameboardSol[1].strip().split(':')[1])
+    bestFit = 1 / minCost
+    return bestFit
+    
+    
+    
+    
+    
+    
 def main():
     """
     Creates a new text document, passes input file to a slightly modified
@@ -279,43 +305,17 @@ def main():
         population is calculated.
         """
         popFitness = fitness(population, gameBoards[i])
+        bestFitVal = getBestFitVal(dpSol[i])
+        for index in range(0, len(popFitness)):
+            if popFitness[index] == bestFitVal:
+                printDpSolution(dpSol[i])
+                printGaSolution(population[index], gameBoards[i])
         
         """
-        Step 3a. Selection. Assign probability of selection to each chromosome.
-        Select a pair of chromosomes to be parents
-        """
-        popSelectProb = selectionProbability(popFitness)
-        parents = selectParents(population, popSelectProb)
-        
-        """
-        Step 3b. Crossover. Select randomly chosen locust. With probability pc,
-        perform crossover with the parents forming two new offspring or clone 
-        two exact copies of the parents.
-        """
-        #crossover(parents)
-        
-        """
-        Step 3c. Mutation.  With probability pm , perform mutation on each of 
-        the two offspring. 
-        """
-        
-        
-        """
-        Step 4. The new population of chromosomes replaces the current 
+        Step 3 and 4. Select parents, crossover and mutate, generate new
         population.
         """
+        newPop = newPopulation(population, popFitness, pc, pm)
         
         
-        """
-        Step 5.  Check termination criteria.  If convergence is achieved then 
-        stop and report results, otherwise go back to Step 2.
-        """
-        
-        
-        '''
-        print(testPop, '\n')
-        print(testPopFitness, '\n')
-        print(testPopSelectProb, '\n')
-        print(parents)
-        '''
 main()		
