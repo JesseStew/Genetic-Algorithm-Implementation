@@ -11,7 +11,6 @@ import sys
 import modified_DP_solution as dpFile
 import random
 
-
 global inputFile, pc, pm
 inputFile = 'input1.txt' # Specify input file
 
@@ -179,7 +178,7 @@ def crossover(locustCandidateList = None, parents):
     pCross = pc*100
     crossVal = random.randint(0, 100)
     if crossVal <= pc:
-        if locustCandidateList = None:
+        if locustCandidateList == None:
             locustCandidateList = [x for x in range(1, len(parents[0] - 1))]
             locust = random.choice(potentialLocusts)
             children = []

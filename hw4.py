@@ -24,7 +24,7 @@ import random
 
 #---------------------------------Variables------------------------------------
 global inputFile
-inputFile = 'input1.txt'
+inputFile = 'input1.txt' # Specifiy input file
 
 #Specify a crossover probability/rate pc and a mutation probability/rate pm.
 crossoverRate = 0.75
@@ -35,14 +35,51 @@ clear = 100*'\n'
 #------------------------------------------------------------------------------
 
 #---------------------------------Classes/Functions----------------------------
-f = open(inputFile, "r")
-totalInput = [] #input from one input file
-for line in f:
-    lyst = line.split() # tokenize input line, it also removes EOL marker
-    lyst = list(map(int, lyst))
-    totalInput.append(lyst)
+"""
+Description: Gather game boards from input file and convert to list of lists
+Input:       inputFile, text document with gameboard data
+Returns:     totalInput, list of lists containing gameboard data
+"""
+def getGameBoards(inputFile):
+    f = open(inputFile, "r")
+    gameBoards = [] #input from one input file
+    for line in f:
+        lyst = line.split() # tokenize input line, it also removes EOL marker
+        lyst = list(map(int, lyst))
+        gameBoards.append(lyst)
+    f.close()
+    return gameBoards
 
-    
+"""
+Description: Gathers output from dynamic programming solution into a list, 
+             formats the minimum cost line, and creates sublists representing
+             each gameboard's output.
+Input:       Text file containing output of dynamic programming solution's
+             print statements.
+Returns:     List containing sublists for each gameboard's dynamic programming
+             solutions.
+"""
+def getDpSolutions(inputFile):
+    solutionFile = inputFile[:-4]+'dpSolution.txt'
+    with open(solutionFile, 'r') as f:
+        lines = [i.strip() for i in f.readlines()]
+        lines[1::5] = ['minimum ' + num for num in lines[1::5]]
+    solutions = [lines[x*5:x*5+5:] for x in range(int(len(lines)/5))]
+    return solutions
+
+"""
+Description: Takes a list containing the dynamic programming solution for a
+             single game board and prints out the information needed in the
+             format matching the assignment example.
+Input:       List with dp solution.
+Output:      Game board, min cost, path indices, and path content.
+"""
+def printDpSolution(dpSolution):
+    print(dpSolution[0] + '\n' + dpSolution[4] + '\n' + "DP Solution")
+    for i in range (1, 4):
+        print(dpSolution[i])
+    print(dpSolution[4])
+
 '''
 Step 0.  Algorithm Initialization.  Assume data are encoded in bit strings (1’s and 0’s).
 Specify a crossover probability/rate pc and a mutation probability/rate pm.  
@@ -130,7 +167,15 @@ def fitnessFunction(initialPopWithCosts):
         fitnessScoresOfPopulation[populationKey] = (fitnessScore)
     return fitnessScoresOfPopulation
 
-
+'''
+-------------------------------------------------------------------------------
+------------------------Code-Inserted-from-hw4Remake.py------------------------
+-------------------------------------------------------------------------------
+'''
+'''
+Step 3a.  Selection.  Using the values from f(x), assign probability of 
+          selection to each chromosome xi. 
+'''
 """
 Description: Divide each f(x) by sum(scores)
 
@@ -151,7 +196,109 @@ def selectionProbability(fitnessScores):
         selectionProbabilitiesOfPopulations[populationKey] = selectionProbabilities
     return selectionProbabilitiesOfPopulations
 
+'''
+Step 3a.  Selection (cont.). Select a pair of chromosomes to be a parent, 
+          allowing chromosomes to potentially pair with itself
+'''
+"""
+Description: Selects two parent chromosomes from the population utilizing
+             selection probability as weights for selection.
+             
+Input:       population (dictionary of lists of lists):
+                A dictionary with keys corresponding to the index
+                of the board associated with the population.
+                
+             selectionProbabilities (dictionary of lists):
+                 A dictionary with the population index as the key
+    
+Returns:     parents (dictionary of lists):
+                 A dictionary of lists containing the two selected chromosomes
+"""
+def selectParents(population, selectionProbabilities):
+    parents = {}
+    for popKey in population:
+        parents[popKey] = random.choices(population[popKey], weights = selectionProbabilities[popKey], k = 2)
+    return parents
+ 
+'''
+Step 3b.  Crossover.  Select randomly chosen locust (crossover point).  With 
+probability pc , perform crossover with the parents forming two new offspring 
+or clone two exact copies of the parents.
+'''
+"""
+Description: ...
+Input:       ...
+Returns:     ...
+"""
+'''@@@@@@@@@@@@@@@
+Bool function to check if the selected locust will work or produce the bug
+'''
+def locustCheck(locustCandidateList, parents, locust):
+    if (parents[0][locust - 1] == 0 and parents[1][locust + 1] == 0):
+        return False
+    else:
+        return True
+    
+    
+"""
+Description: Utilizes pc to determine if crossover occurs. If it doesn't,
+             children represent clones of parents.
+Input:       locustCandidateList, default value is none. May need to call
+             itself with updated list if selected locust produces bug.
+             parents, list containing parent chromosomes
+Returns:     list containing children chromosomes
+"""
+'''@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+I tried to utilize another bool function for this to handle the bug with double
+0's. I also literally just noticed the bug that it might not crossover when
+looping back because it calculates the chance at the start of the function.
+Could just put that line of code in main before crossover is called.
+'''
+'''
+def crossover(locustCandidateList = None, parents):
+    pCross = pc*100
+    crossVal = random.randint(0, 100)
+    if crossVal <= pc:
+        if locustCandidateList == None:
+            locustCandidateList = [x for x in range(1, len(parents[0] - 1))]
+            locust = random.choice(potentialLocusts)
+            children = []
+            if locustCheck == True:
+                for i in range(0, locust):
+                    leftSide =                                      #Error here
+            else:
+                crossover(locustCandidateList, parents)
+    else:
+        return parents
+'''        
+    
+    
+    # Step 3c
+""" 
+Description: Utilizes mc to determine if children will be mutated or not. If
+             they will be, values at randomly selected index will be flipped.
+Input:       children, list containing 2 child chromosomes
+Returns:     children, updated list with new values mutation occurs.
+"""
+''' @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+Needs some error handling for mutations causing two 0s in a row
+'''
+'''
+def mutate(children):
+    mCross = mc*100
+    mutVal = random.randint(0, 100)
+    if mutVal == mCross:
+        mutIndex = random.randint(1, len(children[0]) - 1)
+        if children[mutIndex] == 0:
+            children[mutIndex] = 1
+        else if children[mutIndex] == 1:
+            children[mutIndex] = 0
+    return children
+    else:
+        return children
+'''
 
+#------------------------------------------------------------------------------
 """
 Description: Gathers output from dynamic programming solution into a list, 
              formats the minimum cost line, and creates sublists representing
@@ -169,20 +316,6 @@ def getDpSolutions(inputFile):
     solutions = [lines[x*5:x*5+5:] for x in range(int(len(lines)/5))]
     return solutions
 
-"""
-Description: Takes a list containing the dynamic programming solution for a
-             single game board and prints out the information needed in the
-             format matching the assignment example.
-Input:       List with dp solution.
-Output:      Game board, min cost, path indices, and path content.
-"""
-def printDpSolution(dpSolution):
-    print(dpSolution[0] + '\n' + dpSolution[4] + '\n' + "DP Solution")
-    for i in range (1, 4):
-        print(dpSolution[i])
-    print(dpSolution[4])
-
-    
 #------------------------------------------------------------------------------
 
 #---------------------------------Program Main---------------------------------
@@ -200,28 +333,63 @@ def main():
     sys.stdout = origSysOut
     
     dpSol = getDpSolutions(inputFile)
+    
+    totalInput = getGameBoards(inputFile)
+    
+    '''
+    Step 0.  Algorithm Initialization.  Assume data are encoded in bit strings 
+    (1’s and 0’s). Specify a crossover probability/rate pc and a mutation 
+    probability/rate pm.  Usually pc is chosen to be fairly high and pm is 
+    chosen to be very low.
+    '''
+    #done in calcCost(totalInput) using initializePopulation(totalInput)
+    population = initializePopulation(totalInput)
+    
+    '''
+    Step 1.  The population is chosen consisting of n chromosomes each of length 𝑙.
+    '''
     initialPopWithCosts = calcCost(totalInput)
+    
+    
+    '''
+    Step 2.  The fitness function f(x) for each chromosome in the population is calculated.
+    '''
     fitnessScores = fitnessFunction(initialPopWithCosts)
+    
+    '''
+    Step 3a.  Selection.  Using the values from f(x), assign probability of 
+    selection to each chromosome xi. 
+    '''
     selectionProbabilities = selectionProbability(fitnessScores)
-    #costs = calcCost(totalInput)
-
+    
+    '''
+    Step 3a.  Selection (cont.). Select a pair of chromosomes to be a parent, 
+    allowing chromosomes to potentially pair with itself
+    '''
+    parents = selectParents(population, selectionProbabilities)
+    
     '''
     print(totalInput)
     print(encodedPop)
     print("costs: ", costs)
     '''
     for num in range(0, len(totalInput)):
-        print("totalInput[", num, "]              = ", totalInput[num])
         for itr in range(0, 5):
             print("initialPopWithCosts[", num, "][", itr,"] = ", initialPopWithCosts[num][itr])
             print("fitnessScores[", num, "][", itr,"] = ", fitnessScores[num][itr])
-            print("selectionProbabilities[", num, "][", itr,"] = ", selectionProbabilities[num][itr], "\n")
+            print("selectionProbabilities[", num, "][", itr,"] = ", selectionProbabilities[num][itr], 
+                  "\n\n------------NEW-INDIVIDUAL------------\n")
+        print("------------STATS------------\n")
+        print("parents[", num, "] = ", parents[num], "\n")
+        print("totalInput[", num, "]              = ", totalInput[num])
         print("initialPopWithCosts[", num, "][", len(initialPopWithCosts[num])-1,"]= ", 
-              initialPopWithCosts[num][len(initialPopWithCosts[num])-1])
-        print("len(initialPop[num]) = ", len(initialPopWithCosts[num]), "\n\n")
+              initialPopWithCosts[num][len(initialPopWithCosts[num])-1], "\n")
+        print("parents[", num, "] = ", parents[num], "\n")
+        print("len(initialPop[num]) = ", len(initialPopWithCosts[num]), "\n",
+              "\n------------NEW-BOARD------------\n")
         #print("initialPopWithCosts[", num, "] = ", initialPopWithCosts[num])
         #print("costs[", num, "] = ", costs[num])
-    
+    #print(selectionProbabilities)
     '''
     printDpSolution(dpSol[0])
     printDpSolution(dpSol[1])
