@@ -232,14 +232,46 @@ Returns:     ...
 """
 '''@@@@@@@@@@@@@@@
 Bool function to check if the selected locust will work or produce the bug
+crossoverRate = 0.75
+mutationRate = 0.01
+
+Description: Utilizes pc to determine if crossover occurs. If it doesn't,
+             children represent clones of parents.
+             
+Input:       parents (dictionary of lists):
+                 A dictionary of lists containing the two selected chromosomes.
+
+Returns:     children (dictionary of lists):
+                 A dictionary of lists containing the product of the chromosome 
+                 swap for each parent in parents.
+                 Note:
+                   # May need to change this so that there the crossoverRate is 
+                   # factored in for each parent combination
 '''
-def locustCheck(locustCandidateList, parents, locust):
-    if (parents[0][locust - 1] == 0 and parents[1][locust + 1] == 0):
-        return False
-    else:
-        return True
-    
-    
+def crossover(parents):
+    children = {}
+    randomness = random.random()
+    print("random = ", randomness)
+    print("crossoverRate = ", crossoverRate)
+    if crossoverRate >= randomness:
+        for parentsKey in parents:
+            #creates a random int corresponding to an index within the board game
+            locus = random.randint(0, len(parents[parentsKey][0])-1)
+            child = []
+            #checks for two concurrent 0's with selected locus 
+            #if true, loops until a good locus has been selected
+            while parents[parentsKey][0][locus - 1] == 0 and parents[parentsKey][1][locus] == 0:
+                locus = random.randint(0, len(parents[parentsKey][0])-1)
+            print("locus = ", locus)
+            for chromosomeIndex in range(0, len(parents[parentsKey][0])):
+                #append beginning of first parent to child
+                if chromosomeIndex < locus - 1:
+                    child.append(parents[parentsKey][0][chromosomeIndex])
+                else: #append end of second parent to child
+                    child.append(parents[parentsKey][1][chromosomeIndex])
+            children[parentsKey] = child
+    return children
+   
 """
 Description: Utilizes pc to determine if crossover occurs. If it doesn't,
              children represent clones of parents.
@@ -254,23 +286,7 @@ I tried to utilize another bool function for this to handle the bug with double
 looping back because it calculates the chance at the start of the function.
 Could just put that line of code in main before crossover is called.
 '''
-'''
-def crossover(locustCandidateList = None, parents):
-    pCross = pc*100
-    crossVal = random.randint(0, 100)
-    if crossVal <= pc:
-        if locustCandidateList == None:
-            locustCandidateList = [x for x in range(1, len(parents[0] - 1))]
-            locust = random.choice(potentialLocusts)
-            children = []
-            if locustCheck == True:
-                for i in range(0, locust):
-                    leftSide =                                      #Error here
-            else:
-                crossover(locustCandidateList, parents)
-    else:
-        return parents
-'''        
+
     
     
     # Step 3c
@@ -308,14 +324,6 @@ Input:       Text file containing output of dynamic programming solution's
 Returns:     List containing sublists for each gameboard's dynamic programming
              solutions.
 """
-def getDpSolutions(inputFile):
-    solutionFile = inputFile[:-4]+'dpSolution.txt'
-    with open(solutionFile, 'r') as f:
-        lines = [i.strip() for i in f.readlines()]
-        lines[1::5] = ['minimum ' + num for num in lines[1::5]]
-    solutions = [lines[x*5:x*5+5:] for x in range(int(len(lines)/5))]
-    return solutions
-
 #------------------------------------------------------------------------------
 
 #---------------------------------Program Main---------------------------------
@@ -369,27 +377,40 @@ def main():
     parents = selectParents(population, selectionProbabilities)
     
     '''
+    Step 3b.  Crossover.  Select randomly chosen locust (crossover point).  With 
+    probability pc , perform crossover with the parents forming two new offspring 
+    or clone two exact copies of the parents.
+    '''
+    children = crossover(parents)
+    
+    '''
     print(totalInput)
     print(encodedPop)
     print("costs: ", costs)
     '''
     for num in range(0, len(totalInput)):
+        '''
         for itr in range(0, 5):
             print("initialPopWithCosts[", num, "][", itr,"] = ", initialPopWithCosts[num][itr])
             print("fitnessScores[", num, "][", itr,"] = ", fitnessScores[num][itr])
             print("selectionProbabilities[", num, "][", itr,"] = ", selectionProbabilities[num][itr], 
                   "\n\n------------NEW-INDIVIDUAL------------\n")
-        print("------------STATS------------\n")
+        '''
+        print("initialPopWithCosts[", num, "][", num,"] = ", initialPopWithCosts[num][num])
+        print("fitnessScores[", num, "][", num,"] = ", fitnessScores[num][num])
+        print("selectionProbabilities[", num, "][", num,"] = ", selectionProbabilities[num][num])
+        print("\n------------STATS------------\n")
         print("parents[", num, "] = ", parents[num], "\n")
         print("totalInput[", num, "]              = ", totalInput[num])
         print("initialPopWithCosts[", num, "][", len(initialPopWithCosts[num])-1,"]= ", 
               initialPopWithCosts[num][len(initialPopWithCosts[num])-1], "\n")
         print("parents[", num, "] = ", parents[num], "\n")
+        print("children[", num, "] = ", children[num], "\n")
         print("len(initialPop[num]) = ", len(initialPopWithCosts[num]), "\n",
               "\n------------NEW-BOARD------------\n")
         #print("initialPopWithCosts[", num, "] = ", initialPopWithCosts[num])
         #print("costs[", num, "] = ", costs[num])
-    #print(selectionProbabilities)
+    print(children)
     '''
     printDpSolution(dpSol[0])
     printDpSolution(dpSol[1])
