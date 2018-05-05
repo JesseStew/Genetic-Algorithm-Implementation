@@ -225,16 +225,8 @@ Step 3b.  Crossover.  Select randomly chosen locust (crossover point).  With
 probability pc , perform crossover with the parents forming two new offspring 
 or clone two exact copies of the parents.
 '''
-"""
-Description: ...
-Input:       ...
-Returns:     ...
-"""
-'''@@@@@@@@@@@@@@@
-Bool function to check if the selected locust will work or produce the bug
-crossoverRate = 0.75
-mutationRate = 0.01
 
+'''
 Description: Utilizes pc to determine if crossover occurs. If it doesn't,
              children represent clones of parents.
              
@@ -270,6 +262,9 @@ def crossover(parents):
                 else: #append end of second parent to child
                     child.append(parents[parentsKey][1][chromosomeIndex])
             children[parentsKey] = child
+    else:
+        for parentsKey in parents:
+            children[parentsKey] = parents[random.randint(0,1)]
     return children
    
 """
