@@ -12,8 +12,8 @@ import modified_DP_solution as dpFile
 import random
 
 
-global inputFile, pc, pm
-inputFile = 'input1.txt' # Specify input file
+global inputFile, pc, pm, fitCriteriaMet
+inputFile = 'input2.txt' # Specify input file
 
 #Used to clear console output
 clear = 100*'\n'
@@ -60,6 +60,7 @@ def printGaSolution(chromosome, gameBoard):
     for i in range(0, len(pathValues)):
         print(pathValues[i], end = "")
     print("\n" + "=========================")
+    return cost
     
     
 """
@@ -93,6 +94,7 @@ def printDpSolution(dpSolution):
         print(dpSolution[i])
     print(dpSolution[4])
 
+
   
 # Algorithm step 1 functions:
 """
@@ -104,7 +106,7 @@ Returns:     population, list containing sublists representing each chromosome.
 """
 def initializePopulation(gameBoard):
     population = []
-    for i in range(0, len(gameBoard)):
+    for i in range(0, len(gameBoard)*250):
         chromosome = []
         for num in range(0, len(gameBoard)):
             if ((num > 0) and (chromosome[num-1] == 0)) or \
@@ -184,10 +186,9 @@ Returns:     list containing children chromosomes
 def crossover(locustCandidateList, parents, pc):
     pCross = pc*100
     crossVal = random.randint(0, 100)
+    if locustCandidateList == [None]:
+        locustCandidateList = [x for x in range(1, len(parents[0]))]
     if crossVal <= pCross and locustCandidateList != []:
-        if locustCandidateList == [None]:
-            locustCandidateList = [x for x in range(1, len(parents[0]))]
-        print('candidates', locustCandidateList)
         locust = random.choice(locustCandidateList)
         if locustCheck(locustCandidateList, parents, locust) == True:
             children = []
@@ -197,16 +198,20 @@ def crossover(locustCandidateList, parents, pc):
             children.append(rightChild)
             return children
         else:
+            #del locustCandidateList[locust - 1]
             locustCandidateList.remove(locust)
-            crossover(locustCandidateList, parents, pc)
+            #crossover(locustCandidateList, parents, pc)
+            children = crossover(locustCandidateList, parents, pc)
+            return children
     else:
         return parents
         
     
 """
-Description: ...
-Input:       ...
-Returns:     ...
+Description: Checks to make ensure crossover at locust point will produce
+             a valid output
+Input:       locustCandidateList, parents, locust
+Returns:     Bool, true if locust is valid, false if not
 """
 def locustCheck(locustCandidateList, parents, locust):
     if (parents[0][locust - 1] == 0 and parents[1][locust] == 0):
@@ -223,10 +228,10 @@ Input:       children, list containing 2 child chromosomes
 Returns:     children, updated list with new values mutation occurs.
 """
 def mutate(children, mc):
-    mCross = int(mc*100)
-    mutVal = random.randint(0, 100)
+    mCross = int(mc*1000)
+    mutVal = random.randint(0, 1000)
     if mutVal == mCross:
-        mutIndex = random.randint(1, len(children[0]))
+        mutIndex = random.randint(1, len(children[0]) - 1)
         for i in range(0, 2): 
             if children[i][mutIndex] == 0:
                 children[i][mutIndex] = 1
@@ -252,9 +257,7 @@ def newPopulation(oldPop, popFitness, pc, mc):
         parents = selectParents(oldPop, popSelectProb)
         candList = [None]
         children = crossover(candList, parents, pc)
-        print(children)
         children = mutate(children, mc)
-        print('mut Children', children)
         for item in children:
             newPop.append(item)
     return newPop
@@ -287,12 +290,16 @@ def main():
     gameBoards = getGameBoards(inputFile) # List of gameboards in input file
     dpSol = getDpSolutions(inputFile) # Gather DP solutions
     
+    total = len(gameBoards)
+    print(total)
+    incorrect = 0
+    
     """
     Step 0: Specify a crossover probability/rate pc and a mutation 
     probability/rate pm.
     """
     pc = 0.75
-    pm = 0.01
+    pm = 0.001
     
     for i in range(0, len(gameBoards)):
         """
@@ -306,16 +313,41 @@ def main():
         """
         popFitness = fitness(population, gameBoards[i])
         bestFitVal = getBestFitVal(dpSol[i])
+        
+        fitCriteriaMet = False
         for index in range(0, len(popFitness)):
             if popFitness[index] == bestFitVal:
+                fitCriteriaMet = True
                 printDpSolution(dpSol[i])
                 printGaSolution(population[index], gameBoards[i])
+                break
         
         """
         Step 3 and 4. Select parents, crossover and mutate, generate new
         population.
         """
-        newPop = newPopulation(population, popFitness, pc, pm)
+        if fitCriteriaMet == False:
+            newPop = newPopulation(population, popFitness, pc, pm)
+            newPopFitness = fitness(newPop, gameBoards[i])
+            for index in range(0, len(newPopFitness)):
+                if newPopFitness[index] == bestFitVal:
+                    fitCriteriaMet = True
+                    printDpSolution(dpSol[i])
+                    printGaSolution(newPop[index], gameBoards[i])
+                    break
+                
+            bestCandidateFitness = max(newPopFitness)
+            bestCandidate = newPop[newPopFitness.index(bestCandidateFitness)]
+                
+            dpCost = printDpSolution(dpSol[i])
+            gaCost = printGaSolution(bestCandidate, gameBoards[i])
+            
+            if (dpCost != gaCost):
+                incorrect += 1
+                
+            
+    accuracyRate = ((total - incorrect) / total)
+    print("GA overall Accuracy: " + "{:.2%}".format(accuracyRate))
         
         
 main()		
