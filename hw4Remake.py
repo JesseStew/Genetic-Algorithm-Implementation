@@ -290,9 +290,8 @@ def main():
     gameBoards = getGameBoards(inputFile) # List of gameboards in input file
     dpSol = getDpSolutions(inputFile) # Gather DP solutions
     
-    total = len(gameBoards)
-    print(total)
-    incorrect = 0
+    total = len(gameBoards) # Holds total number of boards for accuracy rate
+    incorrect = 0 # Holds total number of incorrect solutions for accuracy rate
     
     """
     Step 0: Specify a crossover probability/rate pc and a mutation 
@@ -314,6 +313,11 @@ def main():
         popFitness = fitness(population, gameBoards[i])
         bestFitVal = getBestFitVal(dpSol[i])
         
+		
+		"""
+		Step 5. Determines if any population matches fitness criteria for
+		stopping point.
+		"""
         fitCriteriaMet = False
         for index in range(0, len(popFitness)):
             if popFitness[index] == bestFitVal:
@@ -335,17 +339,22 @@ def main():
                     printDpSolution(dpSol[i])
                     printGaSolution(newPop[index], gameBoards[i])
                     break
-                
+            
+			"""
+			Step 5. Stops after one generation is created (specified in
+			homework instructions).
+			"""
             bestCandidateFitness = max(newPopFitness)
             bestCandidate = newPop[newPopFitness.index(bestCandidateFitness)]
                 
             dpCost = printDpSolution(dpSol[i])
             gaCost = printGaSolution(bestCandidate, gameBoards[i])
             
+			# Find number of incorrect answers
             if (dpCost != gaCost):
                 incorrect += 1
                 
-            
+    # Evaluate and print accuracy rate      
     accuracyRate = ((total - incorrect) / total)
     print("GA overall Accuracy: " + "{:.2%}".format(accuracyRate))
         
